@@ -86,5 +86,23 @@ jobs:
         if: failure()
         run: cat server.log
 
-      - name: Build Docker image
-        run: docker build -t product-api:ci-prod .
+            - name: Log in to Docker Hub
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/product-api:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/product-api:${{ github.sha }}
+
+      - name: Build Docker image (PR only, no push)
+        if: github.event_name == 'pull_request'
+        run: docker build -t product-api:ci .
