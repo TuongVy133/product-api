@@ -8,11 +8,11 @@ services:
     volumes:
       - mongo-data-prod:/data/db
     healthcheck:
-      test: ["CMD", "mongosh", "--eval", "db.runCommand({ ping: 1 })"]
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
       interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 10s
+      timeout: 15s
+      retries: 10
+      start_period: 30s
 
   product-api:
     image: tvy123/product-api:latest
